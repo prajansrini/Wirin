@@ -1,0 +1,170 @@
+1.
+Make a directory for the package
+
+bash
+mkdir google-electron-app
+cd google-electron-app
+
+2.
+Create a .json file
+
+bash
+npm init -y
+
+3.
+Install electron packager
+
+bash
+npm install --save-dev electron @electron/packager
+
+4.
+Create a main.js file in the folder and add the following code.
+
+main.js
+
+const { app, BrowserWindow } = require('electron');
+
+function createWindow() {
+  const mainWindow = new BrowserWindow({
+    width: 800,
+    height: 600,
+    autoHideMenuBar: true, // Hide the menu bar initially
+    webPreferences: {
+      nodeIntegration: true
+    }
+  });
+
+  mainWindow.loadURL('https://www.google.com');
+}
+
+app.on('ready', createWindow);
+
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') {
+    app.quit();
+  }
+});
+
+app.on('activate', () => {
+  if (BrowserWindow.getAllWindows().length === 0) {
+    createWindow();
+  }
+});
+
+// Disable menu bar visibility toggle (Alt/Option key)
+app.on('browser-window-created', (event, window) => {
+  window.setAutoHideMenuBar(true);
+  window.setMenuBarVisibility(false);
+});
+
+
+5.
+Edit the json file
+
+package.json
+
+{
+  "name": "google-electron-app",
+  "version": "1.0.0",
+  "description": "An Electron app for Google.com",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "package": "electron-packager . google-electron-app --platform=linux --arch=x64 --out=dist --overwrite"
+  },
+  "author": "Your Name",
+  "license": "MIT",
+  "devDependencies": {
+    "@electron/packager": "^18.3.3",
+    "electron": "^24.0.0",
+    "electron-installer-debian": "^3.2.0"
+  }
+}
+
+6.
+Run to package the application
+
+bash
+npm run package
+
+7.
+Install the electron-installer-debian package
+
+bash
+npm install --save-dev electron-installer-debian
+
+8.
+
+Create a file named create-debian-package.js and add the following code:
+
+create-debian-package.js
+
+const installer = require('electron-installer-debian');
+const path = require('path');
+
+const options = {
+  src: path.join(__dirname, 'dist/google-electron-app-linux-x64/'), // Ensure this path is correct
+  dest: path.join(__dirname, 'dist/'),
+  arch: 'amd64',
+  icon: path.join(__dirname, 'icon.png'), // Ensure this path is correct
+  name: 'google-electron-app',
+  productName: 'Google Electron App',
+  version: '1.0.0',
+  maintainer: 'Your Name <your.email@example.com>',
+  homepage: 'https://www.google.com',
+  categories: ['Utility'],
+  description: 'An Electron app for Google.com',
+  depends: ['libappindicator1', 'libnotify-bin'], // Adjust dependencies as needed
+  lintianOverrides: [
+    'changelog-file-missing-in-native-package'
+  ],
+  // Uncomment and adjust if you have any scripts
+  // scripts: {
+  //   postinst: path.join(__dirname, 'path/to/postinst'),
+  //   prerm: path.join(__dirname, 'path/to/prerm')
+  // }
+};
+
+installer(options)
+  .then(() => {
+    console.log('Debian package created successfully.');
+  })
+  .catch((err) => {
+    console.error('Error creating Debian package:', err);
+  });
+
+
+8.
+Navigate to your project directory:
+cd /home/username/google-electron-app
+
+
+9. 
+Install the latest electron packager
+npm view @electron/packager versions --json
+npm install --save-dev @electron/packager@18.3.3
+
+10.
+Run your create-debian-package.js script
+
+bash
+node create-debian-package.js
+
+11.
+Finally, install the generated Debian package:
+
+bash
+sudo dpkg -i dist/google-electron-app_1.0.0_amd64.deb
+
+
+
+
+
+
+
+
+
+
+
+
+
